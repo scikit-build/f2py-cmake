@@ -61,6 +61,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           echo "CC=clang" >> $GITHUB_ENV
+          echo "FC=gfortran" >> $GITHUB_ENV
 
       - name: Install package
         run: python -m pip install .[test]
