@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import shutil
 from pathlib import Path
 
 import nox
@@ -9,8 +8,8 @@ import nox
 DIR = Path(__file__).parent.resolve()
 
 nox.needs_version = ">=2024.3.2"
-nox.options.sessions = ["lint", "pylint", "tests"]
 nox.options.default_venv_backend = "uv|virtualenv"
+nox.options.sessions = ["lint", "pylint", "tests"]
 
 
 @nox.session
@@ -31,7 +30,7 @@ def pylint(session: nox.Session) -> None:
     """
     # This needs to be installed into the package environment, and is slower
     # than a pre-commit check
-    session.install(".", "pylint>=3.2")
+    session.install(".", "pylint")
     session.run("pylint", "f2py_cmake", *session.posargs)
 
 
@@ -40,37 +39,48 @@ def tests(session: nox.Session) -> None:
     """
     Run the unit and regular tests.
     """
-    session.install(".[test]")
+    session.install("-e.[test]")
     session.run("pytest", *session.posargs)
 
 
 @nox.session(reuse_venv=True)
 def docs(session: nox.Session) -> None:
     """
-    Build the docs. Pass --non-interactive to avoid serving. First positional argument is the target directory.
+    Build the docs. Pass "--serve" to serve. Pass "-b linkcheck" to check links.
     """
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("--serve", action="store_true", help="Serve after building")
     parser.add_argument(
         "-b", dest="builder", default="html", help="Build target (default: html)"
     )
-    parser.add_argument("output", nargs="?", help="Output directory")
     args, posargs = parser.parse_known_args(session.posargs)
-    serve = args.builder == "html" and session.interactive
 
-    session.install("-e.[docs]", "sphinx-autobuild")
+    if args.builder != "html" and args.serve:
+        session.error("Must not specify non-HTML builder with --serve")
+
+    extra_installs = ["sphinx-autobuild"] if args.serve else []
+
+    session.install("-e.[docs]", *extra_installs)
+    session.chdir("docs")
+
+    if args.builder == "linkcheck":
+        session.run(
+            "sphinx-build", "-b", "linkcheck", ".", "_build/linkcheck", *posargs
+        )
+        return
 
     shared_args = (
         "-n",  # nitpicky mode
         "-T",  # full tracebacks
         f"-b={args.builder}",
-        "docs",
-        args.output or f"docs/_build/{args.builder}",
+        ".",
+        f"_build/{args.builder}",
         *posargs,
     )
 
-    if serve:
-        session.run("sphinx-autobuild", "--open-browser", *shared_args)
+    if args.serve:
+        session.run("sphinx-autobuild", *shared_args)
     else:
         session.run("sphinx-build", "--keep-going", *shared_args)
 
@@ -82,14 +92,15 @@ def build_api_docs(session: nox.Session) -> None:
     """
 
     session.install("sphinx")
+    session.chdir("docs")
     session.run(
         "sphinx-apidoc",
         "-o",
-        "docs/api/",
+        "api/",
         "--module-first",
         "--no-toc",
         "--force",
-        "src/f2py_cmake",
+        "../src/f2py_cmake",
     )
 
 
@@ -98,10 +109,6 @@ def build(session: nox.Session) -> None:
     """
     Build an SDist and wheel.
     """
-
-    build_path = DIR.joinpath("build")
-    if build_path.exists():
-        shutil.rmtree(build_path)
 
     session.install("build")
     session.run("python", "-m", "build")

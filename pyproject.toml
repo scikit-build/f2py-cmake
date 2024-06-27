@@ -8,7 +8,7 @@ name = "f2py-cmake"
 authors = [
   { name = "Henry Schreiner", email = "henryfs@princeton.edu" },
 ]
-description = "Helper for F2Py and CMake"
+description = "CMake helpers for building F2Py modules"
 readme = "README.md"
 license.file = "LICENSE"
 requires-python = ">=3.8"
@@ -32,14 +32,14 @@ classifiers = [
 dynamic = ["version"]
 dependencies = []
 
+[project.entry-points."cmake.module"]
+any = "f2py_cmake.cmake"
+
 [project.optional-dependencies]
 test = [
   "pytest >=6",
-  "pytest-cov >=3",
-]
-dev = [
-  "pytest >=6",
-  "pytest-cov >=3",
+  "scikit-build-core",
+  "numpy",
 ]
 docs = [
   "sphinx>=7.0",
@@ -61,9 +61,11 @@ version.source = "vcs"
 build.hooks.vcs.version-file = "src/f2py_cmake/_version.py"
 
 [tool.hatch.envs.default]
-features = ["test"]
-scripts.test = "pytest {args}"
+installer = "uv"
 
+[tool.hatch.envs.hatch-test]
+features = ["test"]
+extra-dependencies = ["cmake", "ninja"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -152,6 +154,5 @@ messages_control.disable = [
   "fixme",
   "line-too-long",
   "missing-module-docstring",
-  "missing-function-docstring",
   "wrong-import-position",
 ]
