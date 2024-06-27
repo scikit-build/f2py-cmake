@@ -62,7 +62,7 @@ jobs:
         run: brew install gcc
 
       - name: Install package
-        run: python -m pip install .[test] scikit-build-core
+        run: python -m pip install .[test]
 
       - name: Test package
         run: >-
