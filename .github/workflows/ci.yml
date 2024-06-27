@@ -63,6 +63,9 @@ jobs:
         with:
           compiler: gcc
 
+      - name: Check sysconfig
+        run: python -m sysconfig
+
       - name: Install package
         run: python -m pip install .[test]
 
