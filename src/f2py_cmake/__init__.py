@@ -1,7 +1,7 @@
 """
 Copyright (c) 2024 Henry Schreiner. All rights reserved.
 
-f2py-cmake: Helper for F2Py and CMake
+f2py-cmake: CMake helpers for building F2Py modules
 """
 
 from __future__ import annotations

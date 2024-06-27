@@ -37,6 +37,8 @@ jobs:
     environment: pypi
     permissions:
       id-token: write
+      attestations: write
+      contents: read
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 
@@ -46,8 +48,9 @@ jobs:
           name: Packages
           path: dist
 
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Generate artifact attestation for sdist and wheel
+        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
         with:
-          # Remember to tell (test-)pypi about this repo before publishing
-          # Remove this line to publish to PyPI
-          repository-url: https://test.pypi.org/legacy/
+          subject-path: "dist/f2py*"
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
