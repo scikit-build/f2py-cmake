@@ -44,7 +44,7 @@ jobs:
         runs-on: [ubuntu-latest, macos-14]
 
         include:
-          - python-version: "pypy-3.10"
+          - python-version: "pypy-3.9"
             runs-on: ubuntu-latest
 
     steps:
