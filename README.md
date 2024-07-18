@@ -67,6 +67,27 @@ requires = ["scikit-build-core", "numpy", "f2py-cmake"]
 build-backend = "scikit_build_core.build"
 ```
 
+## Vendoring
+
+You can vendor UseF2Py into your package, as well. This avoids requiring a
+dependency at build time and protects you against changes in this package, at
+the expense of requiring manual re-vendoring to get bugfixes and/or
+improvements. This mechanism is also ideal if you want to support direct builds,
+outside of scikit-build-core.
+
+You should make a CMake helper directory, such as `cmake`. Add this to your
+`CMakeLists.txt` like this:
+
+```cmake
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+```
+
+Then, you can vendor our file into that folder:
+
+```bash
+pipx run f2py-cmake vendor cmake
+```
+
 <!-- prettier-ignore-start -->
 [actions-badge]:            https://github.com/scikit-build/f2py-cmake/workflows/CI/badge.svg
 [actions-link]:             https://github.com/scikit-build/f2py-cmake/actions

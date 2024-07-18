@@ -30,10 +30,15 @@ classifiers = [
   "Typing :: Typed",
 ]
 dynamic = ["version"]
-dependencies = []
+dependencies = [
+  "importlib_resources; python_version<'3.9'",
+]
 
 [project.entry-points."cmake.module"]
 any = "f2py_cmake.cmake"
+
+[project.scripts]
+f2py-cmake = "f2py_cmake.__main__:main"
 
 [project.optional-dependencies]
 test = [
