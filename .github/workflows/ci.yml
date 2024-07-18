@@ -27,6 +27,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+      - uses: yezz123/setup-uv@v4
       - uses: pre-commit/action@v3.0.1
         with:
           extra_args: --hook-stage manual --all-files
@@ -36,7 +37,6 @@ jobs:
   checks:
     name: Check Python ${{ matrix.python-version }} on ${{ matrix.runs-on }}
     runs-on: ${{ matrix.runs-on }}
-    needs: [pre-commit]
     strategy:
       fail-fast: false
       matrix:
@@ -44,7 +44,7 @@ jobs:
         runs-on: [ubuntu-latest, macos-14]
 
         include:
-          - python-version: "pypy-3.10"
+          - python-version: "pypy-3.9"
             runs-on: ubuntu-latest
 
     steps:
@@ -57,12 +57,17 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
 
+      - uses: yezz123/setup-uv@v4
+
       - name: Install gfortran
         if: runner.os == 'macOS'
-        run: brew install gcc
+        run: |
+          echo "gfortran: $(which gfortran)"
+          brew reinstall gfortran
+          echo "gfortran: $(which gfortran)"
 
       - name: Install package
-        run: python -m pip install .[test]
+        run: uv pip install --system -e .[test]
 
       - name: Test package
         run: >-
