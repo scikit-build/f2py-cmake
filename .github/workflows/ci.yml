@@ -59,7 +59,9 @@ jobs:
 
       - name: Install gfortran
         if: runner.os == 'macOS'
-        run: brew install gcc
+        run: |
+          brew install gcc
+          echo "FC=gfortran" >> $GITHUB_ENV
 
       - name: Install package
         run: python -m pip install .[test]
