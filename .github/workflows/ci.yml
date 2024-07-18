@@ -60,7 +60,7 @@ jobs:
       - name: Install gfortran
         if: runner.os == 'macOS'
         run: |
-          brew install gcc
+          brew install gfortran
           echo "FC=gfortran" >> $GITHUB_ENV
 
       - name: Install package
