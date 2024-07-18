@@ -60,8 +60,9 @@ jobs:
       - name: Install gfortran
         if: runner.os == 'macOS'
         run: |
-          brew install gfortran
-          echo "FC=$(which gfortran)" | tee -a $GITHUB_ENV
+          echo "gfortran: ${which gfortran)"
+          brew reinstall gfortran
+          echo "gfortran: ${which gfortran)"
 
       - name: Install package
         run: python -m pip install .[test]
