@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 if(CMAKE_VERSION VERSION_LESS 3.17)
   message(FATAL_ERROR "CMake 3.17+ required")
 endif()
