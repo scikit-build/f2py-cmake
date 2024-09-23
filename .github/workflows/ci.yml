@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - uses: astral-sh/setup-uv@v2
+      - uses: astral-sh/setup-uv@v3
       - uses: pre-commit/action@v3.0.1
         with:
           extra_args: --hook-stage manual --all-files
@@ -57,7 +57,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
 
-      - uses: astral-sh/setup-uv@v2
+      - uses: astral-sh/setup-uv@v3
 
       - name: Install gfortran
         if: runner.os == 'macOS'
