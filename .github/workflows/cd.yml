@@ -54,3 +54,5 @@ jobs:
           subject-path: "dist/f2py*"
 
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: true
