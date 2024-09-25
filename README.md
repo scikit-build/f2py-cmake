@@ -95,7 +95,6 @@ findings, and conclusions or recommendations expressed in this material are
 those of the author(s) and do not necessarily reflect the views of the National
 Science Foundation.
 
-
 <!-- prettier-ignore-start -->
 [actions-badge]:            https://github.com/scikit-build/f2py-cmake/workflows/CI/badge.svg
 [actions-link]:             https://github.com/scikit-build/f2py-cmake/actions
