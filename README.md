@@ -88,15 +88,22 @@ Then, you can vendor our file into that folder:
 pipx run f2py-cmake vendor cmake
 ```
 
+## Acknowledgements
+
+Support for this work was provided by NSF grant [OAC-2209877][]. Any opinions,
+findings, and conclusions or recommendations expressed in this material are
+those of the author(s) and do not necessarily reflect the views of the National
+Science Foundation.
+
 <!-- prettier-ignore-start -->
 [actions-badge]:            https://github.com/scikit-build/f2py-cmake/workflows/CI/badge.svg
 [actions-link]:             https://github.com/scikit-build/f2py-cmake/actions
 [github-discussions-badge]: https://img.shields.io/static/v1?label=Discussions&message=Ask&color=blue&logo=github
 [github-discussions-link]:  https://github.com/scikit-build/f2py-cmake/discussions
+[oac-2209877]:              https://www.nsf.gov/awardsearch/showAward?AWD_ID=2209877&HistoricalAwards=false
 [pypi-link]:                https://pypi.org/project/f2py-cmake/
 [pypi-platforms]:           https://img.shields.io/pypi/pyversions/f2py-cmake
 [pypi-version]:             https://img.shields.io/pypi/v/f2py-cmake
 [rtd-badge]:                https://readthedocs.org/projects/f2py-cmake/badge/?version=latest
 [rtd-link]:                 https://f2py-cmake.readthedocs.io/en/latest/?badge=latest
-
 <!-- prettier-ignore-end -->

@@ -1,3 +1,7 @@
+# Copyright (c) 2024, Henry Schreiner
+# Developed under NSF AWARD OAC-2209877 and by the respective contributors.
+# All rights reserved.
+#
 # SPDX-License-Identifier: Apache-2.0
 
 if(CMAKE_VERSION VERSION_LESS 3.17)
