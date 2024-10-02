@@ -10,8 +10,8 @@ files_to_sync:
   - .packit.yaml
 
 upstream_package_name: f2py-cmake
-specfile_path: .distro/python-f2py-cmake.spec
-downstream_package_name: python-f2py-cmake
+specfile_path: .distro/f2py-cmake.spec
+downstream_package_name: f2py-cmake
 upstream_tag_template: v{version}
 
 targets: &targets
