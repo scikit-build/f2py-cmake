@@ -1,7 +1,0 @@
-tag: [ smoke ]
-tier: 0
-path: /
-
-/version:
-  test: |
-    python3 -c "import f2py_cmake; print(f2py_cmake.__version__)"
