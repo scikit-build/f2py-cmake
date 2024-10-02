@@ -1,0 +1,23 @@
+/:
+  inherit: false
+
+tag: [ smoke ]
+tier: 0
+path: /
+
+/python-version:
+  test: |
+    python3 -c "import f2py_cmake; print(f2py_cmake.__version__)"
+
+/cmake-modules:
+  test: |
+    cat <<-EOF > test_modules.cmake
+      find_package(Python REQUIRED COMPONENTS NumPy)
+      include(UseF2Py RESULT_VARIABLE UseF2Py_PATH)
+      message("UseF2Py_PATH=\${UseF2Py_PATH}")
+    EOF
+    cmake -P test_modules.cmake
+  adjust:
+    enabled: false
+    because: |
+      Cannot test inside script-mode because targets are not propagated
