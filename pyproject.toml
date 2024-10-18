@@ -32,6 +32,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
+  "numpy",
   "importlib_resources; python_version<'3.9'",
 ]
 
@@ -45,7 +46,6 @@ f2py-cmake = "f2py_cmake.__main__:main"
 test = [
   "pytest >=6",
   "scikit-build-core",
-  "numpy",
 ]
 docs = [
   "sphinx>=7.0",
