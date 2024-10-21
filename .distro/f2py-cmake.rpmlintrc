@@ -1,0 +1,2 @@
+addFilter("E: devel-dependency python3-devel")
+addFilter("dangling-relative-symlink .*/UseF2Py\.cmake")
