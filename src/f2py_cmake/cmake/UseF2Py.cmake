@@ -8,7 +8,7 @@ if(CMAKE_VERSION VERSION_LESS 3.17)
   message(FATAL_ERROR "CMake 3.17+ required")
 endif()
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 if(TARGET Python::NumPy)
   set(_Python Python)
