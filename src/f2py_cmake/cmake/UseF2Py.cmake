@@ -117,7 +117,8 @@ function(f2py_generate_module NAME)
     VERBATIM
     COMMAND
       "${${_Python}_EXECUTABLE}" -m numpy.f2py
-      "${abs_all_files}" ${_file_arg} ${lower} ${F2PY_F2PY_ARGS}
+      "${abs_all_files}" "${_file_arg}" ${lower} "${F2PY_F2PY_ARGS}"
+    COMMAND_EXPAND_LISTS
     COMMAND
       "${CMAKE_COMMAND}" -E touch ${wrapper_files}
     WORKING_DIRECTORY "${F2PY_OUTPUT_DIR}"
