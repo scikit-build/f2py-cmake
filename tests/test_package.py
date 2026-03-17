@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.metadata
 import shutil
 import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
@@ -51,4 +52,7 @@ def test_f90(monkeypatch, tmp_path):
     inner_cmake_dir.mkdir()
     f2py_cmake.vendor.vendorize(inner_cmake_dir)
 
-    subprocess.run(["cmake", "-S", ".", "-B", str(build_dir)], check=True)
+    subprocess.run(
+        ["cmake", "-S", ".", "-B", str(build_dir), f"-DPython_ROOT={sys.prefix}"],
+        check=True,
+    )
