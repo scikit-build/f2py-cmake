@@ -43,18 +43,12 @@ any = "f2py_cmake.cmake"
 [project.scripts]
 f2py-cmake = "f2py_cmake.__main__:main"
 
-[project.optional-dependencies]
+[dependency-groups]
 test = [
   "pytest >=6",
   "scikit-build-core",
 ]
-docs = [
-  "sphinx>=7.0",
-  "myst_parser>=0.13",
-  "sphinx_copybutton",
-  "sphinx_autodoc_typehints",
-  "furo>=2023.08.17",
-]
+dev = [{ include-group = "test" }]
 
 [project.urls]
 Homepage = "https://github.com/scikit-build/f2py-cmake"

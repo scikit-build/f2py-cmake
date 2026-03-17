@@ -66,9 +66,5 @@ jobs:
           brew reinstall gfortran
           echo "gfortran: $(which gfortran)"
 
-      - name: Install package
-        run: uv pip install --system -e .[test]
-
       - name: Test package
-        run: >-
-          python -m pytest --durations=20
+        run: uv run pytest --durations=20
