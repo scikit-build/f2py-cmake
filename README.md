@@ -96,7 +96,7 @@ those of the author(s) and do not necessarily reflect the views of the National
 Science Foundation.
 
 <!-- prettier-ignore-start -->
-[actions-badge]:            https://github.com/scikit-build/f2py-cmake/workflows/CI/badge.svg
+[actions-badge]:            https://github.com/scikit-build/f2py-cmake/actions/workflows/ci.yml/badge.svg
 [actions-link]:             https://github.com/scikit-build/f2py-cmake/actions
 [github-discussions-badge]: https://img.shields.io/static/v1?label=Discussions&message=Ask&color=blue&logo=github
 [github-discussions-link]:  https://github.com/scikit-build/f2py-cmake/discussions

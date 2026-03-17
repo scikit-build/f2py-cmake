@@ -40,11 +40,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.13"]
-        runs-on: [ubuntu-latest, macos-14]
+        python-version: ["3.8", "3.14"]
+        runs-on: [ubuntu-latest, macos-latest]
 
         include:
-          - python-version: "pypy-3.9"
+          - python-version: "pypy-3.11"
             runs-on: ubuntu-latest
 
     steps:
