@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import sys
+import typing
 from pathlib import Path
 
-import pytest
+if typing.TYPE_CHECKING:
+    import pytest
 
 from f2py_cmake.__main__ import main
 

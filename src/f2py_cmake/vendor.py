@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
+import typing
+
+if typing.TYPE_CHECKING:
+    from pathlib import Path
 
 if sys.version_info < (3, 9):
     from importlib_resources import files
