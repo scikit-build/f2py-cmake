@@ -14,14 +14,15 @@ import f2py_cmake as m
 import f2py_cmake.vendor
 
 DIR = Path(__file__).parent.resolve()
+CMAKE = shutil.which("cmake")
 
 
-def test_version():
+def test_version() -> None:
     assert importlib.metadata.version("f2py_cmake") == m.__version__
 
 
-@pytest.mark.skipif(shutil.which("cmake") is None, reason="CMake not found")
-def test_f77(monkeypatch, tmp_path):
+@pytest.mark.skipif(CMAKE is None, reason="CMake not found")
+def test_f77(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.chdir(DIR / "packages/f77")
     build_dir = tmp_path / "build"
 
@@ -38,7 +39,9 @@ def test_f77(monkeypatch, tmp_path):
     assert "fibby-f2pywrappers.f" in build_files
 
 
-def test_f90(monkeypatch, tmp_path):
+@pytest.mark.skipif(CMAKE is None, reason="CMake not found")
+def test_f90(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    assert CMAKE is not None
     src_dir = tmp_path / "source"
     build_dir = tmp_path / "build"
     shutil.copytree(DIR / "packages/f90dual", src_dir)
@@ -53,6 +56,6 @@ def test_f90(monkeypatch, tmp_path):
     f2py_cmake.vendor.vendorize(inner_cmake_dir)
 
     subprocess.run(
-        ["cmake", "-S", ".", "-B", str(build_dir), f"-DPython_ROOT={sys.prefix}"],
+        [CMAKE, "-S", ".", "-B", build_dir, f"-DPython_ROOT={sys.prefix}"],
         check=True,
     )
