@@ -24,12 +24,12 @@ Two distinct distribution paths feed off the same `UseF2Py.cmake` file:
    the bundled CMake file. There is no templating — it is a verbatim copy, which
    `tests/test_vendorize.py` asserts byte-for-byte.
 
-`UseF2Py.cmake` defines the public CMake API: the `F2Py::Headers` /
-`F2Py::F2Py` targets, `f2py_object_library()`, and `f2py_generate_module()`. It
-auto-detects whether `Python` or `Python3` was found (requiring the NumPy
-component) and shells out to `numpy.f2py.get_include()` to locate
-`fortranobject.c/.h`. `f2py_generate_module()` auto-selects F77 vs F90 from file
-extensions unless `F77`/`F90` is passed; this controls which f2py wrapper files
+`UseF2Py.cmake` defines the public CMake API: the `F2Py::Headers` / `F2Py::F2Py`
+targets, `f2py_object_library()`, and `f2py_generate_module()`. It auto-detects
+whether `Python` or `Python3` was found (requiring the NumPy component) and
+shells out to `numpy.f2py.get_include()` to locate `fortranobject.c/.h`.
+`f2py_generate_module()` auto-selects F77 vs F90 from file extensions unless
+`F77`/`F90` is passed; this controls which f2py wrapper files
 (`*-f2pywrappers.f`, `*-f2pywrappers2.f90`) are declared as build outputs.
 
 When editing `UseF2Py.cmake`, keep the minimum CMake version (3.17) consistent
@@ -40,9 +40,11 @@ with the `FATAL_ERROR` guard at the top of the file.
 Run inside the package with `uv run` (e.g. `uv run pytest`).
 
 - `nox` — lint + tests across installed Pythons.
-- `nox -s lint` — pre-commit hooks only. Prefer `prek -a --quiet` for ad-hoc linting.
+- `nox -s lint` — pre-commit hooks only. Prefer `prek -a --quiet` for ad-hoc
+  linting.
 - `nox -s tests` — pytest.
-- `nox -s pylint` — pylint (installs the package; slower than the pre-commit checks).
+- `nox -s pylint` — pylint (installs the package; slower than the pre-commit
+  checks).
 - `nox -s build` — build SDist and wheel.
 - `uv run pytest tests/test_vendorize.py::test_copy_files` — run a single test.
 
@@ -54,6 +56,7 @@ project layout and configures it.
 ## Test fixtures
 
 `tests/packages/` holds real mini-projects used as build fixtures:
+
 - `f77/` — single `.f` file built into a wheel via scikit-build-core.
 - `f90dual/` — nested-subrepo layout exercising vendoring into multiple
   directories and the F90 path.
