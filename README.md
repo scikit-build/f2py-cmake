@@ -104,6 +104,4 @@ Science Foundation.
 [pypi-link]:                https://pypi.org/project/f2py-cmake/
 [pypi-platforms]:           https://img.shields.io/pypi/pyversions/f2py-cmake
 [pypi-version]:             https://img.shields.io/pypi/v/f2py-cmake
-[rtd-badge]:                https://readthedocs.org/projects/f2py-cmake/badge/?version=latest
-[rtd-link]:                 https://f2py-cmake.readthedocs.io/en/latest/?badge=latest
 <!-- prettier-ignore-end -->
