@@ -18,22 +18,23 @@ else()
   message(FATAL_ERROR "You must find Python or Python3 with the NumPy component before including F2PY!")
 endif()
 
-execute_process(
-  COMMAND "${${_Python}_EXECUTABLE}" -c
-          "import numpy.f2py; print(numpy.f2py.get_include())"
-                  OUTPUT_VARIABLE F2PY_inc_output
-                  ERROR_VARIABLE F2PY_inc_error
-                  RESULT_VARIABLE F2PY_inc_result
-                  OUTPUT_STRIP_TRAILING_WHITESPACE
-                  ERROR_STRIP_TRAILING_WHITESPACE)
+if(NOT DEFINED F2PY_INCLUDE_DIR)
+  execute_process(
+    COMMAND "${${_Python}_EXECUTABLE}" -c
+            "import numpy.f2py; print(numpy.f2py.get_include())"
+    OUTPUT_VARIABLE F2PY_inc_output
+    ERROR_VARIABLE F2PY_inc_error
+    RESULT_VARIABLE F2PY_inc_result
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_STRIP_TRAILING_WHITESPACE)
 
-if(NOT F2PY_inc_result EQUAL 0)
-  message(FATAL_ERROR "Can't find f2py, got ${F2PY_inc_output} ${F2PY_inc_error}")
+  if(NOT F2PY_inc_result EQUAL 0)
+    message(FATAL_ERROR "Can't find f2py, got ${F2PY_inc_output} ${F2PY_inc_error}")
+  endif()
+
+  set(F2PY_INCLUDE_DIR "${F2PY_inc_output}" CACHE STRING "")
+  mark_as_advanced(F2PY_INCLUDE_DIR)
 endif()
-
-set(F2PY_INCLUDE_DIR "${F2PY_inc_output}" CACHE STRING "" FORCE)
-set(F2PY_OBJECT_FILES "${F2PY_inc_output}/fortranobject.c;${F2PY_inc_output}/fortranobject.h" CACHE STRING "" FORCE)
-mark_as_advanced(F2PY_INCLUDE_DIR F2PY_OBJECT_FILES)
 
 add_library(F2Py::Headers IMPORTED INTERFACE)
 target_include_directories(F2Py::Headers INTERFACE "${F2PY_INCLUDE_DIR}")
