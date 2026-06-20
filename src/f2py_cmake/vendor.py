@@ -24,7 +24,7 @@ def vendorize(target: Path) -> None:
     """
     if not target.is_dir():
         msg = f"Target directory {target} does not exist"
-        raise AssertionError(msg)
+        raise NotADirectoryError(msg)
 
     cmake_dir = files("f2py_cmake") / "cmake"
 
