@@ -84,10 +84,13 @@ jobs:
         # and add it, and force Ninja since CMake defaults to the Visual Studio
         # generator on Windows, which has no Fortran support.
         run: |
-          $bin = [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' |
-            Where-Object { $_ -and (Test-Path (Join-Path $_ 'gfortran.exe')) } |
+          $gf = Get-ChildItem -Path C:\ProgramData -Filter gfortran.exe -Recurse -Depth 6 -ErrorAction SilentlyContinue |
             Select-Object -First 1
-          if (-not $bin) { throw 'gfortran.exe not found on the machine PATH' }
+          if (-not $gf) {
+            Write-Host "Machine PATH: $([Environment]::GetEnvironmentVariable('Path', 'Machine'))"
+            throw 'gfortran.exe not found under C:\ProgramData'
+          }
+          $bin = Split-Path $gf.FullName
           Write-Host "MinGW bin: $bin"
           "$bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
           "CMAKE_GENERATOR=Ninja" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
