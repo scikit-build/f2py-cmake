@@ -126,7 +126,11 @@ function(f2py_generate_module NAME)
       "F2PY making ${NAME} wrappers"
   )
 
+  # Include the original sources: they define the routines the generated
+  # wrappers call. Omitting them only links on platforms that allow undefined
+  # symbols in shared libraries (i.e. not Windows).
   if(F2PY_OUTPUT_VARIABLE)
-    set(${F2PY_OUTPUT_VARIABLE} ${NAME}module.c ${wrapper_files} PARENT_SCOPE)
+    set(${F2PY_OUTPUT_VARIABLE} ${NAME}module.c ${wrapper_files} ${abs_all_files}
+                                PARENT_SCOPE)
   endif()
 endfunction()
