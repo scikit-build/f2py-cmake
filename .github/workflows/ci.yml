@@ -46,6 +46,8 @@ jobs:
         include:
           - python-version: "pypy-3.11"
             runs-on: ubuntu-latest
+          - python-version: "3.14"
+            runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v6
@@ -65,6 +67,25 @@ jobs:
           echo "gfortran: $(which gfortran)"
           brew reinstall gfortran
           echo "gfortran: $(which gfortran)"
+
+      - name: Set up Fortran (Windows)
+        if: runner.os == 'Windows'
+        uses: fortran-lang/setup-fortran@v1
+        with:
+          compiler: gcc
+          version: 13
+
+      - name: Use Ninja + MinGW (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        # setup-fortran installs MinGW via choco, which only edits the machine
+        # PATH registry; GitHub Actions doesn't reload that into the running job.
+        # Put the bin dir on PATH, and force Ninja since CMake defaults to the
+        # Visual Studio generator on Windows, which has no Fortran support.
+        run: |
+          $bin = Split-Path (Get-ChildItem C:\ProgramData\chocolatey\lib\mingw -Recurse -Filter gfortran.exe | Select-Object -First 1).FullName
+          "$bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          "CMAKE_GENERATOR=Ninja" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Test package
         run: uv run pytest --durations=20
