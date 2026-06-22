@@ -80,10 +80,15 @@ jobs:
         shell: pwsh
         # setup-fortran installs MinGW via choco, which only edits the machine
         # PATH registry; GitHub Actions doesn't reload that into the running job.
-        # Put the bin dir on PATH, and force Ninja since CMake defaults to the
-        # Visual Studio generator on Windows, which has no Fortran support.
+        # Find the bin dir on the machine PATH (layout differs per MinGW version)
+        # and add it, and force Ninja since CMake defaults to the Visual Studio
+        # generator on Windows, which has no Fortran support.
         run: |
-          $bin = Split-Path (Get-ChildItem C:\ProgramData\chocolatey\lib\mingw -Recurse -Filter gfortran.exe | Select-Object -First 1).FullName
+          $bin = [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' |
+            Where-Object { $_ -and (Test-Path (Join-Path $_ 'gfortran.exe')) } |
+            Select-Object -First 1
+          if (-not $bin) { throw 'gfortran.exe not found on the machine PATH' }
+          Write-Host "MinGW bin: $bin"
           "$bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
           "CMAKE_GENERATOR=Ninja" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
