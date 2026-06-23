@@ -65,8 +65,14 @@ function(f2py_generate_module NAME)
     set(F2PY_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}")
   endif()
 
+  set(abs_pyf_file)
   if(NAME MATCHES "\\.pyf$")
-    set(_file_arg "${NAME}")
+    if(IS_ABSOLUTE "${NAME}")
+      set(abs_pyf_file "${NAME}")
+    else()
+      set(abs_pyf_file "${CMAKE_CURRENT_SOURCE_DIR}/${NAME}")
+    endif()
+    set(_file_arg "${abs_pyf_file}")
     get_filename_component(NAME "${NAME}" NAME_WE)
   else()
     set(_file_arg -m ${NAME})
@@ -97,6 +103,12 @@ function(f2py_generate_module NAME)
     set(wrapper_files ${NAME}-f2pywrappers.f ${NAME}-f2pywrappers2.f90)
   endif()
 
+  set(module_output "${F2PY_OUTPUT_DIR}/${NAME}module.c")
+  set(abs_wrapper_files)
+  foreach(wrapper IN LISTS wrapper_files)
+    list(APPEND abs_wrapper_files "${F2PY_OUTPUT_DIR}/${wrapper}")
+  endforeach()
+
   if(F2PY_NOLOWER)
     set(lower "--no-lower")
   else()
@@ -113,15 +125,15 @@ function(f2py_generate_module NAME)
   endforeach()
 
   add_custom_command(
-    OUTPUT ${NAME}module.c ${wrapper_files}
-    DEPENDS ${ALL_FILES}
+    OUTPUT ${module_output} ${abs_wrapper_files}
+    DEPENDS ${abs_all_files} ${abs_pyf_file}
     VERBATIM
     COMMAND
       "${${_Python}_EXECUTABLE}" -m numpy.f2py
       "${abs_all_files}" "${_file_arg}" ${lower} "${F2PY_F2PY_ARGS}"
     COMMAND_EXPAND_LISTS
     COMMAND
-      "${CMAKE_COMMAND}" -E touch ${wrapper_files}
+      "${CMAKE_COMMAND}" -E touch ${abs_wrapper_files}
     WORKING_DIRECTORY "${F2PY_OUTPUT_DIR}"
     COMMENT
       "F2PY making ${NAME} wrappers"
@@ -131,7 +143,7 @@ function(f2py_generate_module NAME)
   # wrappers call. Omitting them only links on platforms that allow undefined
   # symbols in shared libraries (i.e. not Windows).
   if(F2PY_OUTPUT_VARIABLE)
-    set(${F2PY_OUTPUT_VARIABLE} ${NAME}module.c ${wrapper_files} ${abs_all_files}
+    set(${F2PY_OUTPUT_VARIABLE} ${module_output} ${abs_wrapper_files} ${abs_all_files}
                                 PARENT_SCOPE)
   endif()
 endfunction()
