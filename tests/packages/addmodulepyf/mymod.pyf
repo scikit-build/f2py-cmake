@@ -1,0 +1,10 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module mymod ! in
+    interface  ! in :mymod
+        subroutine keep_me(a) ! in :mymod:mymod.f90
+            real*8 intent(out) :: a
+        end subroutine keep_me
+    end interface
+end python module mymod

@@ -58,6 +58,17 @@ def test_add_module(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(CMAKE is None, reason="CMake not found")
+def test_add_module_pyf(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(DIR / "packages/addmodulepyf")
+    build_dir = tmp_path / "build"
+
+    build_wheel(str(tmp_path), {"build-dir": str(build_dir), "wheel.license-files": []})
+
+    build_files = {x.name for x in build_dir.iterdir()}
+    assert "mymodmodule.c" in build_files
+
+
+@pytest.mark.skipif(CMAKE is None, reason="CMake not found")
 def test_signature(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.chdir(DIR / "packages/sig")
     build_dir = tmp_path / "build"

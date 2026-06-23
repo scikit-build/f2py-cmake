@@ -70,6 +70,11 @@ include(UseF2Py)
 f2py_add_module(fibby fib1.f)
 ```
 
+`<name>` may instead be a `.pyf` signature path (as accepted by
+`f2py_generate_module`); the module name is taken from the file stem. The
+created target is a normal CMake target named `<name>`, so customize it
+afterward with `target_*()` / `set_target_properties()` as usual.
+
 If you need to share a single `fortranobject` library across several modules, or
 want the generated sources for custom wiring, use the primitives directly:
 
