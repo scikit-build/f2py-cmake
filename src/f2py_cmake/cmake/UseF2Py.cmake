@@ -151,8 +151,11 @@ function(f2py_generate_module NAME)
   elseif(NOT F2PY_F77 AND NOT F2PY_F90)
     set(HAS_F90_FILE FALSE)
 
+    # Free-form Fortran (.f90 and later) generates a -f2pywrappers2.f90 wrapper;
+    # fixed-form F77 (.f/.F) does not. Lowercase first so .F90, .F95, etc. match.
     foreach(file IN LISTS ALL_FILES)
-        if("${file}" MATCHES "\\.f90$")
+        string(TOLOWER "${file}" file_lower)
+        if("${file_lower}" MATCHES "\\.(f90|f95|f03|f08|f15|f18)$")
             set(HAS_F90_FILE TRUE)
             break()
         endif()
