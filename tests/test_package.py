@@ -53,6 +53,8 @@ def test_signature(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     signature = (build_dir / "mymod.pyf").read_text()
     assert "keep_me" in signature
     assert "drop_me" not in signature
+    # helper.f90 is linked but not part of the signature.
+    assert "compute" not in signature
 
 
 @pytest.mark.skipif(CMAKE is None, reason="CMake not found")

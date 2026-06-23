@@ -1,6 +1,6 @@
 subroutine keep_me(a)
    real*8, intent(out) :: a
-   a = 1.0d0
+   call compute(a)
 end subroutine keep_me
 
 subroutine drop_me(a)
