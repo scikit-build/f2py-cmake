@@ -143,6 +143,17 @@ f2py's own `--f2cmap` default (the cwd) does not work here: these helpers run
 f2py in the build directory, not the source tree, so the file must be located
 explicitly.
 
+## Limitations
+
+The following are deliberate scope boundaries, not bugs:
+
+- **`USE`/`INCLUDE` dependencies are not tracked.** The f2py invocation only
+  depends on the source files you pass to the helper. Files pulled in through
+  Fortran `INCLUDE`, or modules compiled elsewhere and brought in via `USE`, are
+  not listed as dependencies, so editing one of them will not retrigger f2py
+  regeneration. Work around this by passing those files explicitly, touching a
+  tracked source, or doing a clean rebuild.
+
 ## scikit-build-core
 
 To use this package with scikit-build-core, you need to include it in your build
