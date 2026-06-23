@@ -56,6 +56,31 @@ def test_signature(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(CMAKE is None, reason="CMake not found")
+def test_cmix(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    # A Fortran module that calls into a separate C library (issue #20). The
+    # original source must be compiled in and the C library linked, or the
+    # built module fails to import with an undefined symbol. Building isn't
+    # enough to catch this on macOS (-undefined dynamic_lookup), so import it.
+    monkeypatch.chdir(DIR / "packages/cmix")
+    build_dir = tmp_path / "build"
+
+    wheel = build_wheel(
+        str(tmp_path), {"build-dir": str(build_dir), "wheel.license-files": []}
+    )
+
+    install_dir = tmp_path / "install"
+    with zipfile.ZipFile(tmp_path / wheel) as f:
+        f.extractall(install_dir)
+
+    monkeypatch.syspath_prepend(str(install_dir))
+    try:
+        mixed = importlib.import_module("mixed")
+        assert mixed.add_them(2.0, 3.0) == pytest.approx(5.0)
+    finally:
+        sys.modules.pop("mixed", None)
+
+
+@pytest.mark.skipif(CMAKE is None, reason="CMake not found")
 def test_f90(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     assert CMAKE is not None
     src_dir = tmp_path / "source"

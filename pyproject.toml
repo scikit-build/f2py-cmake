@@ -74,6 +74,9 @@ addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
 xfail_strict = true
 filterwarnings = [
   "error",
+  # f2py modules don't declare free-threading support, so a free-threaded
+  # interpreter warns when re-enabling the GIL to import one.
+  "ignore:The global interpreter lock:RuntimeWarning",
 ]
 log_level = "INFO"
 testpaths = [
