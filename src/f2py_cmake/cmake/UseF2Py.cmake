@@ -52,7 +52,7 @@ function(f2py_generate_signature MODULE)
     PARSE_ARGV 1
     F2PY
     "NOLOWER"
-    "OUTPUT;OUTPUT_VARIABLE"
+    "OUTPUT;OUTPUT_VARIABLE;F2CMAP"
     "F2PY_ARGS;SKIP;ONLY"
   )
   set(ALL_FILES ${F2PY_UNPARSED_ARGUMENTS})
@@ -80,6 +80,26 @@ function(f2py_generate_signature MODULE)
     endif()
   endforeach()
 
+  # Resolve the .f2py_f2cmap custom type map. We pass it explicitly because
+  # f2py's --f2cmap default looks in the cwd, which is the binary dir here, not
+  # the source tree where the file lives. An explicit F2CMAP wins; otherwise a
+  # .f2py_f2cmap next to the sources is auto-detected.
+  set(abs_f2cmap)
+  if(F2PY_F2CMAP)
+    if(IS_ABSOLUTE "${F2PY_F2CMAP}")
+      set(abs_f2cmap "${F2PY_F2CMAP}")
+    else()
+      set(abs_f2cmap "${CMAKE_CURRENT_SOURCE_DIR}/${F2PY_F2CMAP}")
+    endif()
+  elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.f2py_f2cmap")
+    set(abs_f2cmap "${CMAKE_CURRENT_SOURCE_DIR}/.f2py_f2cmap")
+  endif()
+
+  set(f2cmap_arg)
+  if(abs_f2cmap)
+    set(f2cmap_arg --f2cmap "${abs_f2cmap}")
+  endif()
+
   # Translate the ONLY/SKIP routine filters into f2py's "only: <names> :" /
   # "skip: <names> :" selector blocks (each runs until a bare ":").
   set(selectors)
@@ -100,12 +120,12 @@ function(f2py_generate_signature MODULE)
   # which would break incremental rebuilds.
   add_custom_command(
     OUTPUT "${abs_pyf_file}"
-    DEPENDS ${abs_source_files}
+    DEPENDS ${abs_source_files} ${abs_f2cmap}
     VERBATIM
     COMMAND
       "${${_Python}_EXECUTABLE}" -m numpy.f2py
       -h "${abs_pyf_file}" --overwrite-signature -m "${MODULE}"
-      ${abs_source_files} ${selectors} ${lower} "${F2PY_F2PY_ARGS}"
+      ${abs_source_files} ${selectors} ${lower} ${f2cmap_arg} "${F2PY_F2PY_ARGS}"
     COMMAND_EXPAND_LISTS
     COMMENT
       "F2PY generating ${MODULE} signature"
@@ -123,7 +143,7 @@ function(f2py_generate_module NAME)
     PARSE_ARGV 1
     F2PY
     "NOLOWER;F77;F90"
-    "OUTPUT_DIR;OUTPUT_VARIABLE"
+    "OUTPUT_DIR;OUTPUT_VARIABLE;F2CMAP"
     "F2PY_ARGS"
   )
   set(ALL_FILES ${F2PY_UNPARSED_ARGUMENTS})
@@ -195,6 +215,26 @@ function(f2py_generate_module NAME)
     endif()
   endforeach()
 
+  # Resolve the .f2py_f2cmap custom type map. We pass it explicitly because
+  # f2py's --f2cmap default looks in the cwd, which is OUTPUT_DIR (the binary
+  # dir) here, not the source tree where the file lives. An explicit F2CMAP
+  # wins; otherwise a .f2py_f2cmap next to the sources is auto-detected.
+  set(abs_f2cmap)
+  if(F2PY_F2CMAP)
+    if(IS_ABSOLUTE "${F2PY_F2CMAP}")
+      set(abs_f2cmap "${F2PY_F2CMAP}")
+    else()
+      set(abs_f2cmap "${CMAKE_CURRENT_SOURCE_DIR}/${F2PY_F2CMAP}")
+    endif()
+  elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.f2py_f2cmap")
+    set(abs_f2cmap "${CMAKE_CURRENT_SOURCE_DIR}/.f2py_f2cmap")
+  endif()
+
+  set(f2cmap_arg)
+  if(abs_f2cmap)
+    set(f2cmap_arg --f2cmap "${abs_f2cmap}")
+  endif()
+
   # A signature file fully specifies the interface, so f2py reads only it; the
   # sources are compiled and linked separately (via OUTPUT_VARIABLE). Mixing the
   # two on the command line makes f2py reject the bare-subroutine source blocks.
@@ -207,11 +247,11 @@ function(f2py_generate_module NAME)
 
   add_custom_command(
     OUTPUT ${module_output} ${abs_wrapper_files}
-    DEPENDS ${abs_all_files} ${abs_pyf_file}
+    DEPENDS ${abs_all_files} ${abs_pyf_file} ${abs_f2cmap}
     VERBATIM
     COMMAND
       "${${_Python}_EXECUTABLE}" -m numpy.f2py
-      ${f2py_inputs} ${lower} "${F2PY_F2PY_ARGS}"
+      ${f2py_inputs} ${lower} ${f2cmap_arg} "${F2PY_F2PY_ARGS}"
     COMMAND_EXPAND_LISTS
     COMMAND
       "${CMAKE_COMMAND}" -E touch ${abs_wrapper_files}

@@ -112,6 +112,36 @@ def test_cmix(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(CMAKE is None, reason="CMake not found")
+def test_f2cmap(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    # kinds.f90 uses real(kind=dp); without the .f2py_f2cmap mapping dp to
+    # double, f2py can't wrap scale_dp. The file lives next to the sources and
+    # is auto-detected (no explicit F2CMAP arg), so the build and import only
+    # succeed if the source-tree .f2py_f2cmap is found.
+    monkeypatch.chdir(DIR / "packages/f2cmap")
+    build_dir = tmp_path / "build"
+
+    wheel = build_wheel(
+        str(tmp_path), {"build-dir": str(build_dir), "wheel.license-files": []}
+    )
+
+    install_dir = tmp_path / "install"
+    with zipfile.ZipFile(tmp_path / wheel) as f:
+        f.extractall(install_dir)
+
+    monkeypatch.syspath_prepend(str(install_dir))
+    try:
+        # Without the auto-detected .f2py_f2cmap, f2py maps dp to C float and
+        # the dp Fortran argument is fed a single-precision value, losing
+        # precision. A value that only round-trips through double exactly
+        # confirms dp was mapped to double.
+        kinds = importlib.import_module("kinds")
+        x = 0.1
+        assert kinds.kinds.scale_dp(x) == pytest.approx(0.2, abs=1e-15)
+    finally:
+        sys.modules.pop("kinds", None)
+
+
+@pytest.mark.skipif(CMAKE is None, reason="CMake not found")
 def test_f90(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     assert CMAKE is not None
     src_dir = tmp_path / "source"
