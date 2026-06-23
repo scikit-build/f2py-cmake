@@ -228,3 +228,65 @@ function(f2py_generate_module NAME)
                                 PARENT_SCOPE)
   endif()
 endfunction()
+
+# One-shot helper: generate the f2py wrappers, build the Python extension
+# module, and compile/link fortranobject in one call. This is sugar over
+# f2py_object_library + f2py_generate_module + python_add_library; reach for the
+# primitives directly when sharing a single fortranobject library across modules
+# or when you need OUTPUT_VARIABLE for custom wiring. The pass-through options
+# match f2py_generate_module.
+function(f2py_add_module NAME)
+  cmake_parse_arguments(
+    PARSE_ARGV 1
+    F2PY
+    "NOLOWER;F77;F90"
+    "OUTPUT_DIR"
+    "F2PY_ARGS"
+  )
+
+  # Forward the parsed options back through to f2py_generate_module. Each option
+  # is only added when it was set so f2py_generate_module's own defaults apply.
+  set(generate_args)
+  if(F2PY_F77)
+    list(APPEND generate_args F77)
+  endif()
+  if(F2PY_F90)
+    list(APPEND generate_args F90)
+  endif()
+  if(F2PY_NOLOWER)
+    list(APPEND generate_args NOLOWER)
+  endif()
+  if(F2PY_OUTPUT_DIR)
+    list(APPEND generate_args OUTPUT_DIR "${F2PY_OUTPUT_DIR}")
+  endif()
+  if(F2PY_F2PY_ARGS)
+    list(APPEND generate_args F2PY_ARGS ${F2PY_F2PY_ARGS})
+  endif()
+
+  # A pyf module argument carries the .pyf path; strip it to the real module
+  # name so the target/library names and the OUTPUT_VARIABLE we read back match
+  # f2py_generate_module's output. The .pyf path itself is still passed through
+  # to f2py_generate_module, which strips it the same way internally.
+  set(MODULE_NAME "${NAME}")
+  if(MODULE_NAME MATCHES "\\.pyf$")
+    get_filename_component(MODULE_NAME "${MODULE_NAME}" NAME_WE)
+  endif()
+
+  f2py_generate_module(${NAME} ${F2PY_UNPARSED_ARGUMENTS}
+                       ${generate_args} OUTPUT_VARIABLE ${MODULE_NAME}_files)
+
+  # ${_Python} is Python or Python3; the matching <Python>_add_library command
+  # can't be named through a variable, so dispatch on it explicitly. Only MODULE
+  # type and WITH_SOABI matter here; USE_SABI (limited ABI) doesn't apply because
+  # the generated module and fortranobject use the full CPython/NumPy C API.
+  if(_Python STREQUAL "Python")
+    Python_add_library(${MODULE_NAME} MODULE "${${MODULE_NAME}_files}" WITH_SOABI)
+  else()
+    Python3_add_library(${MODULE_NAME} MODULE "${${MODULE_NAME}_files}" WITH_SOABI)
+  endif()
+
+  # Compile fortranobject into a private per-module object library; the unique
+  # name avoids collisions when f2py_add_module is called for several modules.
+  f2py_object_library(${MODULE_NAME}_f2py_object OBJECT)
+  target_link_libraries(${MODULE_NAME} PRIVATE ${MODULE_NAME}_f2py_object)
+endfunction()
