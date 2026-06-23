@@ -40,6 +40,22 @@ def test_f77(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(CMAKE is None, reason="CMake not found")
+def test_signature(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(DIR / "packages/sig")
+    build_dir = tmp_path / "build"
+
+    build_wheel(str(tmp_path), {"build-dir": str(build_dir), "wheel.license-files": []})
+
+    build_files = {x.name for x in build_dir.iterdir()}
+    assert "mymod.pyf" in build_files
+    assert "mymodmodule.c" in build_files
+
+    signature = (build_dir / "mymod.pyf").read_text()
+    assert "keep_me" in signature
+    assert "drop_me" not in signature
+
+
+@pytest.mark.skipif(CMAKE is None, reason="CMake not found")
 def test_f90(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     assert CMAKE is not None
     src_dir = tmp_path / "source"

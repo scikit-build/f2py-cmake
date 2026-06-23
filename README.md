@@ -28,6 +28,13 @@ also provide the following helper functions:
 ```cmake
 f2py_object_library(<name> <type>)
 
+f2py_generate_signature(<module> <files>...
+                  OUTPUT <Signature>
+                  [OUTPUT_VARIABLE <OutputVariable>]
+                  [NOLOWER]
+                  [F2PY_ARGS <args> ...]
+                  )
+
 f2py_generate_module(<module> <files>...
                   [F2PY_ARGS <args> ...]
                   [F77 | F90]
@@ -54,6 +61,25 @@ f2py_generate_module(fibby fib1.f OUTPUT_VARIABLE fibby_files)
 
 python_add_library(fibby MODULE "${fibby_files}" WITH_SOABI)
 target_link_libraries(fibby PRIVATE f2py_object)
+```
+
+## Signatures
+
+`f2py_generate_signature` generates a `.pyf` signature file from Fortran
+sources, which `f2py_generate_module` can then consume as its `<module>`
+argument. f2py's `skip:`/`only:` selectors restrict which routines are wrapped;
+write them inline among the source files (a `skip:`/`only:` block runs until a
+bare `:`):
+
+```cmake
+f2py_generate_signature(mymod a.f90 b.f90 "only:" public_api ":"
+                        OUTPUT mymod.pyf OUTPUT_VARIABLE mymod_sig)
+
+# The signature defines the interface; a.f90/b.f90 are compiled and linked.
+f2py_generate_module(${mymod_sig} a.f90 b.f90 OUTPUT_VARIABLE mymod_files)
+
+python_add_library(mymod MODULE "${mymod_files}" WITH_SOABI)
+target_link_libraries(mymod PRIVATE f2py_object)
 ```
 
 ## scikit-build-core

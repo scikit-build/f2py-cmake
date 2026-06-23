@@ -47,6 +47,82 @@ function(f2py_object_library NAME TYPE)
   endif()
 endfunction()
 
+function(f2py_generate_signature MODULE)
+  cmake_parse_arguments(
+    PARSE_ARGV 1
+    F2PY
+    "NOLOWER"
+    "OUTPUT;OUTPUT_VARIABLE"
+    "F2PY_ARGS"
+  )
+  set(ALL_ARGS ${F2PY_UNPARSED_ARGUMENTS})
+
+  if(NOT F2PY_OUTPUT)
+    message(FATAL_ERROR "OUTPUT <signature.pyf> is required")
+  endif()
+
+  if(IS_ABSOLUTE "${F2PY_OUTPUT}")
+    set(abs_pyf_file "${F2PY_OUTPUT}")
+  else()
+    set(abs_pyf_file "${CMAKE_CURRENT_BINARY_DIR}/${F2PY_OUTPUT}")
+  endif()
+
+  # Walk the arguments, absolutizing source files but passing f2py's skip:/only:
+  # routine selectors through untouched. A skip:/only: token opens a block of
+  # routine names that runs until a bare ":"; those names are not paths.
+  set(passthrough_args)
+  set(abs_source_files)
+  set(in_selector_block FALSE)
+  foreach(arg IN LISTS ALL_ARGS)
+    if(arg STREQUAL "skip:" OR arg STREQUAL "only:")
+      set(in_selector_block TRUE)
+      list(APPEND passthrough_args "${arg}")
+    elseif(arg STREQUAL ":")
+      set(in_selector_block FALSE)
+      list(APPEND passthrough_args "${arg}")
+    elseif(in_selector_block)
+      list(APPEND passthrough_args "${arg}")
+    elseif(IS_ABSOLUTE "${arg}")
+      list(APPEND passthrough_args "${arg}")
+      list(APPEND abs_source_files "${arg}")
+    else()
+      list(APPEND passthrough_args "${CMAKE_CURRENT_SOURCE_DIR}/${arg}")
+      list(APPEND abs_source_files "${CMAKE_CURRENT_SOURCE_DIR}/${arg}")
+    endif()
+  endforeach()
+
+  if(NOT abs_source_files)
+    message(FATAL_ERROR "One or more input files must be specified")
+  endif()
+
+  if(F2PY_NOLOWER)
+    set(lower "--no-lower")
+  else()
+    set(lower "--lower")
+  endif()
+
+  # --overwrite-signature is required: f2py refuses to replace an existing .pyf,
+  # which would break incremental rebuilds.
+  add_custom_command(
+    OUTPUT "${abs_pyf_file}"
+    DEPENDS ${abs_source_files}
+    VERBATIM
+    COMMAND
+      "${${_Python}_EXECUTABLE}" -m numpy.f2py
+      -h "${abs_pyf_file}" --overwrite-signature -m "${MODULE}"
+      ${passthrough_args} ${lower} "${F2PY_F2PY_ARGS}"
+    COMMAND_EXPAND_LISTS
+    COMMENT
+      "F2PY generating ${MODULE} signature"
+  )
+
+  set_source_files_properties("${abs_pyf_file}" PROPERTIES GENERATED TRUE)
+
+  if(F2PY_OUTPUT_VARIABLE)
+    set(${F2PY_OUTPUT_VARIABLE} "${abs_pyf_file}" PARENT_SCOPE)
+  endif()
+endfunction()
+
 function(f2py_generate_module NAME)
   cmake_parse_arguments(
     PARSE_ARGV 1
@@ -72,10 +148,7 @@ function(f2py_generate_module NAME)
     else()
       set(abs_pyf_file "${CMAKE_CURRENT_SOURCE_DIR}/${NAME}")
     endif()
-    set(_file_arg "${abs_pyf_file}")
     get_filename_component(NAME "${NAME}" NAME_WE)
-  else()
-    set(_file_arg -m ${NAME})
   endif()
 
   if(F2PY_F77 AND F2PY_F90)
@@ -124,13 +197,23 @@ function(f2py_generate_module NAME)
     endif()
   endforeach()
 
+  # A signature file fully specifies the interface, so f2py reads only it; the
+  # sources are compiled and linked separately (via OUTPUT_VARIABLE). Mixing the
+  # two on the command line makes f2py reject the bare-subroutine source blocks.
+  # Without a signature, f2py reads the sources directly to wrap module NAME.
+  if(abs_pyf_file)
+    set(f2py_inputs "${abs_pyf_file}")
+  else()
+    set(f2py_inputs ${abs_all_files} -m ${NAME})
+  endif()
+
   add_custom_command(
     OUTPUT ${module_output} ${abs_wrapper_files}
     DEPENDS ${abs_all_files} ${abs_pyf_file}
     VERBATIM
     COMMAND
       "${${_Python}_EXECUTABLE}" -m numpy.f2py
-      "${abs_all_files}" "${_file_arg}" ${lower} "${F2PY_F2PY_ARGS}"
+      ${f2py_inputs} ${lower} "${F2PY_F2PY_ARGS}"
     COMMAND_EXPAND_LISTS
     COMMAND
       "${CMAKE_COMMAND}" -E touch ${abs_wrapper_files}
