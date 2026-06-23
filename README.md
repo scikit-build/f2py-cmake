@@ -154,11 +154,6 @@ The following are deliberate scope boundaries, not bugs:
   regeneration. Work around this by passing those files explicitly, touching a
   tracked source, or doing a clean rebuild.
 
-- **Pure-C wrapping is out of scope.** These helpers wrap Fortran sources,
-  optionally through a generated or hand-written `.pyf` signature. Wrapping
-  plain C functions via a `.pyf` with `intent(c)` and no Fortran source is not a
-  supported workflow.
-
 ## scikit-build-core
 
 To use this package with scikit-build-core, you need to include it in your build
