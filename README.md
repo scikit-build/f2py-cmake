@@ -84,6 +84,18 @@ python_add_library(mymod MODULE "${mymod_files}" WITH_SOABI)
 target_link_libraries(mymod PRIVATE f2py_object)
 ```
 
+The files passed to `f2py_generate_module` need not match those used for the
+signature. The signature alone defines the wrapped interface, so you can build
+it from a subset and link extra Fortran that is called internally but never
+exposed to Python:
+
+```cmake
+f2py_generate_signature(mymod a.f90 OUTPUT mymod.pyf OUTPUT_VARIABLE mymod_sig)
+
+# helper.f90 is linked but not wrapped.
+f2py_generate_module("${mymod_sig}" a.f90 helper.f90 OUTPUT_VARIABLE mymod_files)
+```
+
 ## scikit-build-core
 
 To use this package with scikit-build-core, you need to include it in your build
