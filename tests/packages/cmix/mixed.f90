@@ -2,10 +2,11 @@
 ! Without the original source compiled into the module (or the C library
 ! linked), importing this fails with an undefined symbol (issue #20).
 subroutine add_them(a, b, c)
-  use iso_c_binding, only: c_double
   implicit none
-  real(c_double), intent(in) :: a, b
-  real(c_double), intent(out) :: c
+  ! Plain double precision in the wrapped signature: older f2py maps the
+  ! iso_c_binding c_double kind to C float, which silently corrupts results.
+  double precision, intent(in) :: a, b
+  double precision, intent(out) :: c
   interface
     function add_in_c(x, y) bind(c, name="add_in_c") result(r)
       use iso_c_binding, only: c_double
