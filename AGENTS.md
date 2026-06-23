@@ -24,10 +24,10 @@ Two distinct distribution paths feed off the same `UseF2Py.cmake` file:
    the bundled CMake file. There is no templating — it is a verbatim copy, which
    `tests/test_vendorize.py` asserts byte-for-byte.
 
-`UseF2Py.cmake` defines the public CMake API: the `F2Py::Headers` / `F2Py::F2Py`
-targets, `f2py_object_library()`, and `f2py_generate_module()`. It auto-detects
-whether `Python` or `Python3` was found (requiring the NumPy component) and
-shells out to `numpy.f2py.get_include()` to locate `fortranobject.c/.h`.
+`UseF2Py.cmake` defines the public CMake API: the `F2Py::Headers` target,
+`f2py_object_library()`, and `f2py_generate_module()`. It auto-detects whether
+`Python` or `Python3` was found (requiring the NumPy component) and shells out
+to `numpy.f2py.get_include()` to locate `fortranobject.c/.h`.
 `f2py_generate_module()` auto-selects F77 vs F90 from file extensions unless
 `F77`/`F90` is passed; this controls which f2py wrapper files
 (`*-f2pywrappers.f`, `*-f2pywrappers2.f90`) are declared as build outputs.
