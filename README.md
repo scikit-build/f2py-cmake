@@ -22,8 +22,7 @@ include(UseF2Py)
 ```
 
 You must have found a Python interpreter beforehand. This will define a
-`F2Py::F2Py` target (along with a matching `F2PY_EXECUTABLE` variable). It will
-also provide the following helper functions:
+`F2Py::Headers` target and provide the following helper functions:
 
 ```cmake
 f2py_object_library(<name> <type>)
