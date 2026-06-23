@@ -93,7 +93,7 @@ exposed to Python:
 f2py_generate_signature(mymod a.f90 OUTPUT mymod.pyf OUTPUT_VARIABLE mymod_sig)
 
 # helper.f90 is linked but not wrapped.
-f2py_generate_module(${mymod_sig} a.f90 helper.f90 OUTPUT_VARIABLE mymod_files)
+f2py_generate_module("${mymod_sig}" a.f90 helper.f90 OUTPUT_VARIABLE mymod_files)
 ```
 
 ## scikit-build-core
