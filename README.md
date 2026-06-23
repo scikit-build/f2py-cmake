@@ -44,9 +44,20 @@ f2py_generate_module(<module> <files>...
                   [OUTPUT_DIR <OutputDir>]
                   [OUTPUT_VARIABLE <OutputVariable>]
                   )
+
+f2py_add_module(<name> <files>...
+                  [F2PY_ARGS <args> ...]
+                  [F77 | F90]
+                  [NOLOWER]
+                  [OUTPUT_DIR <OutputDir>]
+                  )
 ```
 
 ## Example
+
+`f2py_add_module` builds an importable extension module in a single call. It
+generates the wrappers, creates the Python module target, and compiles/links the
+F2Py `fortranobject` support for you:
 
 ```cmake
 find_package(
@@ -56,6 +67,13 @@ find_package(
 
 include(UseF2Py)
 
+f2py_add_module(fibby fib1.f)
+```
+
+If you need to share a single `fortranobject` library across several modules, or
+want the generated sources for custom wiring, use the primitives directly:
+
+```cmake
 # Create the F2Py `numpyobject` library.
 f2py_object_library(f2py_object OBJECT)
 

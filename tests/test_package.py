@@ -40,6 +40,24 @@ def test_f77(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(CMAKE is None, reason="CMake not found")
+def test_add_module(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(DIR / "packages/addmodule")
+    build_dir = tmp_path / "build"
+
+    wheel = build_wheel(
+        str(tmp_path), {"build-dir": str(build_dir), "wheel.license-files": []}
+    )
+
+    with zipfile.ZipFile(tmp_path / wheel) as f:
+        file_names = set(f.namelist())
+    assert len(file_names) == 4
+
+    build_files = {x.name for x in build_dir.iterdir()}
+    assert "fibbymodule.c" in build_files
+    assert "fibby-f2pywrappers.f" in build_files
+
+
+@pytest.mark.skipif(CMAKE is None, reason="CMake not found")
 def test_signature(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.chdir(DIR / "packages/sig")
     build_dir = tmp_path / "build"
