@@ -11,7 +11,8 @@ include(UseF2Py)
 f2py_object_library(f2py_object OBJECT)
 
 # Generate a signature that wraps only keep_me, then build the module from it.
-f2py_generate_signature(mymod mymod.f90 "skip:" drop_me ":"
+f2py_generate_signature(mymod mymod.f90
+                        SKIP drop_me
                         OUTPUT mymod.pyf OUTPUT_VARIABLE mymod_sig)
 
 f2py_generate_module(${mymod_sig} mymod.f90 OUTPUT_VARIABLE mymod_files)

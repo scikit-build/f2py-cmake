@@ -30,6 +30,8 @@ f2py_object_library(<name> <type>)
 
 f2py_generate_signature(<module> <files>...
                   OUTPUT <Signature>
+                  [ONLY <functions> ...]
+                  [SKIP <functions> ...]
                   [OUTPUT_VARIABLE <OutputVariable>]
                   [NOLOWER]
                   [F2PY_ARGS <args> ...]
@@ -67,12 +69,12 @@ target_link_libraries(fibby PRIVATE f2py_object)
 
 `f2py_generate_signature` generates a `.pyf` signature file from Fortran
 sources, which `f2py_generate_module` can then consume as its `<module>`
-argument. f2py's `skip:`/`only:` selectors restrict which routines are wrapped;
-write them inline among the source files (a `skip:`/`only:` block runs until a
-bare `:`):
+argument. `ONLY` and `SKIP` restrict which routines are wrapped (a thin wrapper
+over f2py's `only:`/`skip:` selectors):
 
 ```cmake
-f2py_generate_signature(mymod a.f90 b.f90 "only:" public_api ":"
+f2py_generate_signature(mymod a.f90 b.f90
+                        ONLY public_api
                         OUTPUT mymod.pyf OUTPUT_VARIABLE mymod_sig)
 
 # The signature defines the interface; a.f90/b.f90 are compiled and linked.

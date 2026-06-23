@@ -53,12 +53,16 @@ function(f2py_generate_signature MODULE)
     F2PY
     "NOLOWER"
     "OUTPUT;OUTPUT_VARIABLE"
-    "F2PY_ARGS"
+    "F2PY_ARGS;SKIP;ONLY"
   )
-  set(ALL_ARGS ${F2PY_UNPARSED_ARGUMENTS})
+  set(ALL_FILES ${F2PY_UNPARSED_ARGUMENTS})
 
   if(NOT F2PY_OUTPUT)
     message(FATAL_ERROR "OUTPUT <signature.pyf> is required")
+  endif()
+
+  if(NOT ALL_FILES)
+    message(FATAL_ERROR "One or more input files must be specified")
   endif()
 
   if(IS_ABSOLUTE "${F2PY_OUTPUT}")
@@ -67,32 +71,23 @@ function(f2py_generate_signature MODULE)
     set(abs_pyf_file "${CMAKE_CURRENT_BINARY_DIR}/${F2PY_OUTPUT}")
   endif()
 
-  # Walk the arguments, absolutizing source files but passing f2py's skip:/only:
-  # routine selectors through untouched. A skip:/only: token opens a block of
-  # routine names that runs until a bare ":"; those names are not paths.
-  set(passthrough_args)
   set(abs_source_files)
-  set(in_selector_block FALSE)
-  foreach(arg IN LISTS ALL_ARGS)
-    if(arg STREQUAL "skip:" OR arg STREQUAL "only:")
-      set(in_selector_block TRUE)
-      list(APPEND passthrough_args "${arg}")
-    elseif(arg STREQUAL ":")
-      set(in_selector_block FALSE)
-      list(APPEND passthrough_args "${arg}")
-    elseif(in_selector_block)
-      list(APPEND passthrough_args "${arg}")
-    elseif(IS_ABSOLUTE "${arg}")
-      list(APPEND passthrough_args "${arg}")
-      list(APPEND abs_source_files "${arg}")
+  foreach(file IN LISTS ALL_FILES)
+    if(IS_ABSOLUTE "${file}")
+      list(APPEND abs_source_files "${file}")
     else()
-      list(APPEND passthrough_args "${CMAKE_CURRENT_SOURCE_DIR}/${arg}")
-      list(APPEND abs_source_files "${CMAKE_CURRENT_SOURCE_DIR}/${arg}")
+      list(APPEND abs_source_files "${CMAKE_CURRENT_SOURCE_DIR}/${file}")
     endif()
   endforeach()
 
-  if(NOT abs_source_files)
-    message(FATAL_ERROR "One or more input files must be specified")
+  # Translate the ONLY/SKIP routine filters into f2py's "only: <names> :" /
+  # "skip: <names> :" selector blocks (each runs until a bare ":").
+  set(selectors)
+  if(F2PY_ONLY)
+    list(APPEND selectors "only:" ${F2PY_ONLY} ":")
+  endif()
+  if(F2PY_SKIP)
+    list(APPEND selectors "skip:" ${F2PY_SKIP} ":")
   endif()
 
   if(F2PY_NOLOWER)
@@ -110,7 +105,7 @@ function(f2py_generate_signature MODULE)
     COMMAND
       "${${_Python}_EXECUTABLE}" -m numpy.f2py
       -h "${abs_pyf_file}" --overwrite-signature -m "${MODULE}"
-      ${passthrough_args} ${lower} "${F2PY_F2PY_ARGS}"
+      ${abs_source_files} ${selectors} ${lower} "${F2PY_F2PY_ARGS}"
     COMMAND_EXPAND_LISTS
     COMMENT
       "F2PY generating ${MODULE} signature"
