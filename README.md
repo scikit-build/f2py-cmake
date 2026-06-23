@@ -32,6 +32,7 @@ f2py_generate_signature(<module> <files>...
                   [ONLY <functions> ...]
                   [SKIP <functions> ...]
                   [OUTPUT_VARIABLE <OutputVariable>]
+                  [F2CMAP <file>]
                   [NOLOWER]
                   [F2PY_ARGS <args> ...]
                   )
@@ -40,6 +41,7 @@ f2py_generate_module(<module> <files>...
                   [F2PY_ARGS <args> ...]
                   [F77 | F90]
                   [NOLOWER]
+                  [F2CMAP <file>]
                   [OUTPUT_DIR <OutputDir>]
                   [OUTPUT_VARIABLE <OutputVariable>]
                   )
@@ -117,6 +119,29 @@ f2py_generate_signature(mymod a.f90 OUTPUT mymod.pyf OUTPUT_VARIABLE mymod_sig)
 # helper.f90 is linked but not wrapped.
 f2py_generate_module("${mymod_sig}" a.f90 helper.f90 OUTPUT_VARIABLE mymod_files)
 ```
+
+## Custom type maps
+
+Fortran code that uses custom kinds (such as `real(kind=dp)`) needs a
+`.f2py_f2cmap` file telling f2py how to map those kinds to C types, e.g.:
+
+```python
+dict(real=dict(dp="double"))
+```
+
+A `.f2py_f2cmap` placed next to your sources is auto-detected by both
+`f2py_generate_signature` and `f2py_generate_module`. You can also point at one
+explicitly with `F2CMAP <file>` (a relative path is resolved against the current
+source directory, and an explicit `F2CMAP` overrides auto-detection):
+
+```cmake
+f2py_generate_module(mymod mymod.f90 F2CMAP maps/types.f2cmap
+                     OUTPUT_VARIABLE mymod_files)
+```
+
+f2py's own `--f2cmap` default (the cwd) does not work here: these helpers run
+f2py in the build directory, not the source tree, so the file must be located
+explicitly.
 
 ## scikit-build-core
 
