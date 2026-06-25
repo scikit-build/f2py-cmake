@@ -42,6 +42,12 @@ target_include_directories(F2Py::Headers INTERFACE "${F2PY_INCLUDE_DIR}")
 function(f2py_object_library NAME TYPE)
   add_library(${NAME} ${TYPE} "${F2PY_INCLUDE_DIR}/fortranobject.c")
   target_link_libraries(${NAME} PUBLIC ${_Python}::NumPy F2Py::Headers)
+  # fortranobject.c includes Python.h, but since CMP0201 (CMake 4.2) the NumPy
+  # target no longer pulls in the Development.Module headers, so link it
+  # explicitly. Guarded so a NumPy-only find_package still falls back gracefully.
+  if(TARGET ${_Python}::Module)
+    target_link_libraries(${NAME} PUBLIC ${_Python}::Module)
+  endif()
   if("${TYPE}" STREQUAL "OBJECT")
     set_property(TARGET ${NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
   endif()
